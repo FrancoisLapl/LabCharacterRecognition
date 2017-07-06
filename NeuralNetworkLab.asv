@@ -29,9 +29,12 @@ network.trainParam.epochs = 1000;
 [trainedNetwork, trainingRecord] = train(network, testData, testTarget,'useGPU','yes');
 
 % Training dataset validation
-trainingOutputs = trainedNetwork(testData);
-[processedOutput] = processNetworkOutput(trainingOutputs);
-PrintConfusionMatrix(testTarget, processedOutput);
+trainingOutputs = trainedNetwork(trainData);
+[]
+
+TrainingErrors = gsubtract(TrainTarget, trainingOutputs);
+TrainingPerformance = perform(trainedNetwork, TrainTarget, trainingOutputs);
+plotconfusion(trainingOutputs, TrainingErrors );
 
 %functions
 function [target,dataset] = parseData(rawDataSet, numberOfClasses)
@@ -47,7 +50,7 @@ function [target,dataset] = parseData(rawDataSet, numberOfClasses)
     end
 end
 
-function [processedOutput] = processNetworkOutput(aiResult)
+function [processedOutput] = ProcessNetworkResult(aiResult)
     [rowCount,colCount] = size(aiResult);
     %Create a zeroed matrix
     processedOutput =  zeros(rowCount, colCount, 'double');
@@ -55,7 +58,7 @@ function [processedOutput] = processNetworkOutput(aiResult)
     for i = 1:colCount
         %For each column of the aiResultDataset find the most confident
         %value(biggest).
-        biggestValue = aiResult(1,i);
+        biggestValue = aiResult(i,1);
         biggestValueIndex = 1;
         
         for j = 2:rowCount
@@ -70,7 +73,7 @@ function [processedOutput] = processNetworkOutput(aiResult)
 end
 
 function [] = PrintConfusionMatrix(trainTarget, processedResultMatrix)
-    trainingErrors = gsubtract(trainTarget, processedResultMatrix);
-    trainingPerformance = perform(trainedNetwork, TrainTarget, trainingOutputs);
-    plotconfusion(processedResultMatrix, trainingErrors );
+    TrainingErrors = gsubtract(TrainTarget, trainingOutputs);
+    TrainingPerformance = perform(trainedNetwork, TrainTarget, trainingOutputs);
+    plotconfusion(trainingOutputs, TrainingErrors );
 end
